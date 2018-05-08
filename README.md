@@ -1,2 +1,2 @@
-# oauth-wrapper
+# spotify-oauth-wrapper
 OAuth wrapper template
