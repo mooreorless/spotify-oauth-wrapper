@@ -3,6 +3,12 @@ require('dotenv').config('../.env');
 const queryString = require('query-string');
 const request = require('request-promise');
 
+let auth = new Buffer(
+  `${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`);
+let headers = {
+  'Content-Type': 'application/x-www-form-urlencoded',
+  Authorization: `Basic ${auth.toString('base64')}`
+}
 
 const redirect = (resp, cxt) => {
   let params = queryString.stringify(cxt.params);
@@ -13,13 +19,6 @@ const redirect = (resp, cxt) => {
 };
 
 const requestToken = (resp, cxt) => {
-  let auth = new Buffer(
-    `${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`);
-  let headers = {
-    'Content-Type': 'application/x-www-form-urlencoded',
-    Authorization: `Basic ${auth.toString('base64')}`
-  }
-
   return request({
     uri: cxt.url,
     method: 'POST',
@@ -28,7 +27,14 @@ const requestToken = (resp, cxt) => {
   })
 };
 
-const refreshToken = (resp, cxt) => {};
+const refreshToken = (resp, cxt) => {
+  return request({
+    uri: cxt.url,
+    method: 'POST',
+    body: queryString.stringify(cxt.params),
+    headers,
+  })
+};
 
 
-module.exports = { redirect, requestToken };
+module.exports = { redirect, requestToken, refreshToken };
