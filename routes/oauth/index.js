@@ -6,12 +6,16 @@ const randomString = require('randomstring');
 
 const router = express.Router();
 
-const { redirect, requestToken } = require('../../util'); 
+const { 
+  redirect,
+  requestToken,
+  refreshToken,
+} = require('../../util'); 
 
-let spotify_url = 'https://accounts.spotify.com';
+let spotify_url = process.SPOTIFY_ACCOUNT_URI;
 let scopes = process.env.SCOPES;
 
-router.get('/login', (req, res) => {
+router.get('/login', (req, res, next) => {
   return redirect(res, {
     url: `${spotify_url}/authorize`,
     params: {
@@ -40,14 +44,28 @@ router.get('/callback', (req, res, next) => {
     }
   })
   .then(data => {
-    let body = JSON.parse(data);
-    console.log(body);
     return redirect(res, {
       url: process.env.FRONTEND_URI,
-      params: {
-        access_token: body.access_token || null
-      }
+      params: JSON.parse(data)
     })
+  })
+  .catch(err => next(err));
+});
+
+router.post('/refresh', (req, res, next) => {
+  let { refresh_token } = req.query;
+  
+  return refreshToken(res, {
+    url: `${spotify_url}/api/token`,
+    params: {
+      grant_type: 'refresh_token',
+      refresh_token,
+    }
+  })
+  .then(token => {
+    if (token) {
+      res.send(token);
+    }
   })
   .catch(err => next(err));
 });

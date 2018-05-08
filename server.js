@@ -8,7 +8,6 @@ const port = process.env.PORT || 3001;
 const routes = require('./routes');
 
 app.use(bodyParser.json());
-// app.use('/oauth', routes);
 app.use(routes);  
 
 app.listen(port, () => console.log(`Server started on ${port}.`));
